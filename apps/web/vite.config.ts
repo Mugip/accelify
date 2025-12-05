@@ -14,17 +14,13 @@ import { restart } from './plugins/restart';
 import { restartEnvFileChange } from './plugins/restartEnvFileChange';
 
 export default defineConfig({
-  // Keep them available via import.meta.env.NEXT_PUBLIC_*
   envPrefix: 'NEXT_PUBLIC_',
   optimizeDeps: {
-    // Explicitly include fast-glob, since it gets dynamically imported and we
-    // don't want that to cause a re-bundle.
     include: ['fast-glob', 'lucide-react'],
     exclude: [
       '@hono/auth-js/react',
       '@hono/auth-js',
       '@auth/core',
-      '@hono/auth-js',
       'hono/context-storage',
       '@auth/core/errors',
       'fsevents',
@@ -40,10 +36,10 @@ export default defineConfig({
       runtime: 'node',
     }),
     babel({
-      include: ['src/**/*.{js,jsx,ts,tsx}'], // or RegExp: /src\/.*\.[tj]sx?$/
-      exclude: /node_modules/, // skip everything else
+      include: ['src/**/*.{js,jsx,ts,tsx}'],
+      exclude: /node_modules/,
       babelConfig: {
-        babelrc: false, // don’t merge other Babel files
+        babelrc: false,
         configFile: false,
         plugins: ['styled-jsx/babel'],
       },
@@ -82,11 +78,12 @@ export default defineConfig({
     allowedHosts: true,
     host: '0.0.0.0',
     port: 4000,
-    hmr: {
-      overlay: false,
-    },
+    hmr: { overlay: false },
     warmup: {
       clientFiles: ['./src/app/**/*', './src/app/root.tsx', './src/app/routes.ts'],
     },
+  },
+  build: {
+    outDir: 'dist', // ✅ Add this for Vercel
   },
 });
