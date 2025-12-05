@@ -1,43 +1,48 @@
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { useCallback, useEffect, useMemo } from 'react';
-import { create } from 'zustand';
-import { Modal, View } from 'react-native';
+import { useCallback, useEffect } from 'react';
 import { useAuthModal, useAuthStore, authKey } from './store';
+import { supabase } from '../../lib/supabase';
 
-
-/**
- * This hook provides authentication functionality.
- * It may be easier to use the `useAuthModal` or `useRequireAuth` hooks
- * instead as those will also handle showing authentication to the user
- * directly.
- */
 export const useAuth = () => {
   const { isReady, auth, setAuth } = useAuthStore();
   const { isOpen, close, open } = useAuthModal();
 
   const initiate = useCallback(() => {
-    SecureStore.getItemAsync(authKey).then((auth) => {
+    SecureStore.getItemAsync(authKey).then((authData) => {
       useAuthStore.setState({
-        auth: auth ? JSON.parse(auth) : null,
+        auth: authData ? JSON.parse(authData) : null,
         isReady: true,
       });
     });
   }, []);
 
-  useEffect(() => {}, []);
+  // Sign in with email (magic link)
+  const signIn = useCallback(
+    async (email) => {
+      const { error } = await supabase.auth.signInWithOtp({ email });
+      if (error) throw error;
+      open({ mode: 'signin', message: 'Check your email for the magic link!' });
+    },
+    [open]
+  );
 
-  const signIn = useCallback(() => {
-    open({ mode: 'signin' });
-  }, [open]);
-  const signUp = useCallback(() => {
-    open({ mode: 'signup' });
-  }, [open]);
+  // Sign up (same as sign in with email)
+  const signUp = useCallback(
+    async (email) => {
+      const { error } = await supabase.auth.signInWithOtp({ email });
+      if (error) throw error;
+      open({ mode: 'signup', message: 'Check your email for the magic link!' });
+    },
+    [open]
+  );
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
     setAuth(null);
     close();
-  }, [close]);
+    router.replace('/'); // optional: redirect to home
+  }, [close, setAuth]);
 
   return {
     isReady,
@@ -51,9 +56,6 @@ export const useAuth = () => {
   };
 };
 
-/**
- * This hook will automatically open the authentication modal if the user is not authenticated.
- */
 export const useRequireAuth = (options) => {
   const { isAuthenticated, isReady } = useAuth();
   const { open } = useAuthModal();

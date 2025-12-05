@@ -1,35 +1,18 @@
-import * as React from 'react';
-import { useSession } from "@auth/create/react";
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
+export default function useUser() {
+  const [user, setUser] = useState(supabase.auth.getUser()?.data.user ?? null);
+  const [loading, setLoading] = useState(true);
 
-const useUser = () => {
-  const { data: session, status } = useSession();
-  const id = session?.user?.id
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-  const [user, setUser] = React.useState(session?.user ?? null);
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
-  const fetchUser = React.useCallback(async (session) => {
-  return session?.user;
-}, [])
-
-  const refetchUser = React.useCallback(() => {
-    if(process.env.NEXT_PUBLIC_CREATE_ENV === "PRODUCTION") {
-      if (id) {
-        fetchUser(session).then(setUser);
-      } else {
-        setUser(null);
-      }
-    }
-  }, [fetchUser, id])
-
-  React.useEffect(refetchUser, [refetchUser]);
-
-  if (process.env.NEXT_PUBLIC_CREATE_ENV !== "PRODUCTION") {
-    return { user, data: session?.user || null, loading: status === 'loading', refetch: refetchUser };
-  }
-  return { user, data: user, loading: status === 'loading' || (status === 'authenticated' && !user), refetch: refetchUser };
-};
-
-export { useUser }
-
-export default useUser;
+  return { user, loading };
+}

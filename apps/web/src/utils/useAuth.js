@@ -1,46 +1,30 @@
 import { useCallback } from 'react';
-import { signIn, signOut } from "@auth/create/react";
+import { supabase } from '../lib/supabase';
 
 function useAuth() {
-  const callbackUrl = typeof window !== 'undefined' 
-    ? new URLSearchParams(window.location.search).get('callbackUrl')
-    : null;
-
-  const signInWithCredentials = useCallback((options) => {
-    return signIn("credentials-signin", {
-      ...options,
-      callbackUrl: callbackUrl ?? options.callbackUrl
-    });
-  }, [callbackUrl])
-
-  const signUpWithCredentials = useCallback((options) => {
-    return signIn("credentials-signup", {
-      ...options,
-      callbackUrl: callbackUrl ?? options.callbackUrl
-    });
-  }, [callbackUrl])
-
-  const signInWithGoogle = useCallback((options) => {
-    return signIn("google", {
-      ...options,
-      callbackUrl: callbackUrl ?? options.callbackUrl
-    });
-  }, [callbackUrl]);
-  const signInWithFacebook = useCallback((options) => {
-    return signIn("facebook", options);
+  const signInWithEmail = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) throw error;
+    return true;
   }, []);
-  const signInWithTwitter = useCallback((options) => {
-    return signIn("twitter", options);
+
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+    if (error) throw error;
+    return true;
+  }, []);
+
+  const signOut = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    return true;
   }, []);
 
   return {
-    signInWithCredentials,
-    signUpWithCredentials,
+    signInWithEmail,
     signInWithGoogle,
-    signInWithFacebook,
-    signInWithTwitter,
-    signOut,
-  }
+    signOut
+  };
 }
 
 export default useAuth;
