@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "projects": {},
   "builds": [
     {
       "src": "apps/web/package.json",
