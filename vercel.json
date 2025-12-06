@@ -1,26 +1,28 @@
 {
   "version": 2,
+  "installCommand": "cd apps/web && npm install",
+  "buildCommand": "cd apps/web && npm run build",
+  "outputDirectory": "apps/web/dist",
+
   "builds": [
     {
       "src": "apps/web/__create/index.ts",
       "use": "@vercel/node"
     },
     {
-      "src": "apps/web/build/client/**/*",
+      "src": "apps/web/dist/client/**/*",
       "use": "@vercel/static"
     }
   ],
+
   "routes": [
     {
       "src": "/assets/(.*)",
-      "dest": "/apps/web/build/client/assets/$1"
+      "dest": "/apps/web/dist/client/assets/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/apps/web/__create/index.ts"
     }
-  ],
-  "installCommand": "cd apps/web && npm install --legacy-peer-deps",
-  "buildCommand": "cd apps/web && npm run build",
-  "outputDirectory": "apps/web/build/client"
+  ]
 }
