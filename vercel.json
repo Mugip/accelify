@@ -1,28 +1,23 @@
-{
-  "version": 2,
-  "installCommand": "cd apps/web && npm install",
-  "buildCommand": "cd apps/web && npm run build",
-  "outputDirectory": "apps/web/dist",
-
-  "builds": [
-    {
-      "src": "apps/web/__create/index.ts",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "apps/web/dist/client/**/*",
-      "use": "@vercel/static"
-    }
-  ],
-
-  "routes": [
-    {
-      "src": "/assets/(.*)",
-      "dest": "/apps/web/dist/client/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/apps/web/__create/index.ts"
-    }
-  ]
-}
+‎{
+‎  "buildCommand": "cd apps/web && npm run build",
+‎  "outputDirectory": "apps/web/.next",
+‎  "installCommand": "npm install",
+‎  "framework": "nextjs",
+‎  "rewrites": [
+‎    {
+‎      "source": "/api/:path*",
+‎      "destination": "/api/:path*"
+‎    }
+‎  ],
+‎  "headers": [
+‎    {
+‎      "source": "/api/:path*",
+‎      "headers": [
+‎        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+‎        { "key": "Access-Control-Allow-Origin", "value": "*" },
+‎        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+‎        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
+‎      ]
+‎    }
+‎  ]
+‎}
